@@ -21,11 +21,16 @@
 <div class="flex-center position-ref full-height">
     <div class="flex-column">
         <div class="content">
-            <div class="title">Your link:</div>
-        </div>
-        <div class="content">
+            <div class="title">Your short link:</div>
             <div class="input-group mb-3">
                 <input type="text" class="form-control" aria-label="Link" aria-describedby="basic-addon2" id="url" value="{{ url()->route('home') . '/' . $url }}">
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="submit" id="urlbtn">Copy link</button>
+                </div>
+            </div>
+            <div class="title">Statistics:</div>
+            <div class="input-group mb-3">
+                <input type="text" class="form-control" aria-label="LinkStat" aria-describedby="basic-addon2" id="urlstat" value="{{ url()->route('home') . '/stat/' . $url }}">
                 <div class="input-group-append">
                     <button class="btn btn-outline-secondary" type="submit" id="urlbtn">Copy link</button>
                 </div>

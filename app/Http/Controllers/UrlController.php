@@ -39,6 +39,7 @@ class UrlController extends Controller
         if (empty($url)) {
 
             //если включено ограничение времени жизни
+            $expireDateTime = null;
             if ($urlRequest['datetime']) {
                 $now = Carbon::now()->addHours(3);
                 $expireDateTime = new Carbon($urlRequest['datetime']);
@@ -53,7 +54,9 @@ class UrlController extends Controller
             $url = Url::create(['url' => $urlText, 'expire' => $expireDateTime]);
         }
 
+        //сделаем ссылочку
         $hash = $hashids->encode($url['id']);
+
         return view('short', ['url' => $hash]);
     }
 
@@ -73,10 +76,13 @@ class UrlController extends Controller
             //если ссылка истекла удалим её
             if($now->diffInMinutes($expire, false) <= 0){
                 $url->delete();
-                abort(404);
+                abort(419);
             }
         }
         $url = 'http://' . $url['url'];
+
+//        dd($_SERVER['HTTP_USER_AGENT']);
+
         return redirect()->away(url($url));
     }
 }
