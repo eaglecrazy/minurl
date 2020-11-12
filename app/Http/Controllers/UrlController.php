@@ -6,6 +6,7 @@ use App\Http\Requests\UrlRequest;
 use App\Url;
 use Illuminate\Http\Request;
 use Hashids\Hashids;
+use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Str;
 
 
@@ -30,6 +31,17 @@ class UrlController extends Controller
         }
 
         $hash = $hashids->encode($url['id']);
-        echo $hash;
+        return view('short', ['url' => $hash]);
+    }
+
+    public function redirect($uri){
+        $hashids = new Hashids('urlsalt#', 4, 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');
+        $id = $hashids->decode($uri);
+        if(!count($id)){
+            abort(404);
+        }
+        $url = Url::find($id[0]);
+        $url = 'http://' . $url['url'];
+        return redirect()->away(url($url));
     }
 }

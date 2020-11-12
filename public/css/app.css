@@ -2435,7 +2435,7 @@ textarea.form-control.is-valid {
 }
 
 .invalid-feedback {
-  display: block;
+  display: none;
   width: 100%;
   margin-top: 0.25rem;
   font-size: 80%;
@@ -10927,12 +10927,6 @@ body {
   position: relative;
 }
 
-.top-right {
-  position: absolute;
-  right: 10px;
-  top: 18px;
-}
-
 .content {
   text-align: center;
 }
@@ -10941,17 +10935,7 @@ body {
   font-size: 84px;
 }
 
-.links > a {
-  color: #636b6f;
-  padding: 0 25px;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.1rem;
-  text-decoration: none;
-  text-transform: uppercase;
-}
-
-.m-b-md {
-  margin-bottom: 30px;
+.invalid-feedback {
+  display: block;
 }
 
