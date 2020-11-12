@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\UrlRequest;
 use App\Url;
+use App\UrlData;
 use Hashids\Hashids;
 use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
@@ -68,7 +69,8 @@ class UrlController extends Controller
         if (!count($id)) {
             abort(404);
         }
-        $url = Url::find($id[0]);
+        $id = $id[0];
+        $url = Url::find($id);
 
         //проверка на время жизни ссылки
         if (isset($url['expire'])) {
@@ -83,17 +85,32 @@ class UrlController extends Controller
         $url = 'http://' . $url['url'];
 
         //СОБЕРЁМ СТАТИСТИКУ
-        $browser = $this->parseUserAgent($_SERVER['HTTP_USER_AGENT']);
-
-        $ip = $this->get_ip();
-        //ТЕСТОВЫЙ АДРЕС
-        $ip = '2.136.0.255';
-        $place = $this->get_place($ip);
-
+        $this->statistics($id);
+        dd('stop redirect');
         return redirect()->away(url($url));
     }
 
-    function get_ip()
+    private function statistics($id){
+        $browser = $this->parseUserAgent($_SERVER['HTTP_USER_AGENT']);
+        $ip = $this->get_ip();
+        //ТЕСТОВЫЙ АДРЕС
+        $ips = ['2.136.0.255', '185.81.67.98', '77.222.113.80', '66.249.89.243', '2.132.171.161', '103.253.24.37'];
+        $ip = $ips[rand(0, 5)];
+        $place = $this->get_place($ip);
+
+        $data = UrlData::create([
+            'linkId' => $id,
+            'ip' => $ip,
+            'browser' => $browser,
+            'country' => $place['country'],
+            'city' => $place['city'],
+            'region' => $place['region'],
+        ]);
+
+        dd($data);
+    }
+
+    private function get_ip()
     {
         $value = '';
         if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
@@ -106,7 +123,6 @@ class UrlController extends Controller
 
         return $value;
     }
-
 
     private function get_place($ip)
     {
@@ -125,7 +141,6 @@ class UrlController extends Controller
             'country' => $info['country_name'],
             'city' => $info['city_name'],
             'region' => $info['region_name'],
-            'ip' => $ip,
         ];
     }
 
