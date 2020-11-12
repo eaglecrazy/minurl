@@ -19,6 +19,9 @@ class CreateUrlTable extends Migration
             $table
                 ->text('url')
                 ->comment('Link');
+            $table
+                ->dateTime('expire')
+                ->nullable();
         });
     }
 

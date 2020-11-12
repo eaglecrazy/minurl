@@ -4,20 +4,30 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\UrlRequest;
 use App\Url;
-use Illuminate\Http\Request;
 use Hashids\Hashids;
-use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Str;
+use Illuminate\Support\Carbon;
 
 
 class UrlController extends Controller
 {
-    public function geturl(UrlRequest $urlRrequest)
+    public function home()
+    {
+        $date = Carbon::now()->toDateString();
+        $time = Carbon::now()
+            ->addHours(3)
+            ->addMinutes(5)
+            ->toTimeString('minutes');
+        $minTime = $date . 'T' . $time;
+        return view('url', ['mintime' => $minTime]);
+    }
+
+    public function geturl(UrlRequest $urlRequest)
     {
         $hashids = new Hashids('urlsalt#', 4, 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');
 
         //убираем лишние символы из ссылки
-        $urlText = $urlRrequest->input('url');
+        $urlText = $urlRequest->input('url');
         $urlText = Str::replaceFirst('http://', '', $urlText);
         $urlText = Str::replaceFirst('https://', '', $urlText);
         if ($urlText[Str::length($urlText) - 1] == '/') {
@@ -27,20 +37,45 @@ class UrlController extends Controller
         //поищем этот url
         $url = Url::where('url', $urlText)->first();
         if (empty($url)) {
-            $url = Url::create(['url' => $urlText]);
+
+            //если включено ограничение времени жизни
+            if ($urlRequest['datetime']) {
+                $now = Carbon::now()->addHours(3);
+                $expireDateTime = new Carbon($urlRequest['datetime']);
+                //введено неправильное время
+                if ($now->diffInMinutes($expireDateTime, false) <= 0) {
+                    return redirect(route('home'))
+                        ->withInput()
+                        ->withErrors(['datetime' => 'Wrong date or time.']);
+                }
+            }
+
+            $url = Url::create(['url' => $urlText, 'expire' => $expireDateTime]);
         }
 
         $hash = $hashids->encode($url['id']);
         return view('short', ['url' => $hash]);
     }
 
-    public function redirect($uri){
+    public function redirect($uri)
+    {
         $hashids = new Hashids('urlsalt#', 4, 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');
         $id = $hashids->decode($uri);
-        if(!count($id)){
+        if (!count($id)) {
             abort(404);
         }
         $url = Url::find($id[0]);
+
+        //проверка на время жизни ссылки
+        if(isset($url['expire'])){
+            $now = Carbon::now()->addHours(3);
+            $expire = new Carbon($url['expire']);
+            //если ссылка истекла удалим её
+            if($now->diffInMinutes($expire, false) <= 0){
+                $url->delete();
+                abort(404);
+            }
+        }
         $url = 'http://' . $url['url'];
         return redirect()->away(url($url));
     }

@@ -15,6 +15,9 @@
     <link rel="icon" type="image/ico" href="favicon.ico" sizes="16x16">
     <link rel="icon" type="image/ico" href="favicon.ico" sizes="32x32">
     <link rel="icon" type="image/ico" href="favicon.ico" sizes="96x96">
+    {{--JS--}}
+    <script defer src="js/app.js"></script>
+    <script defer src="js/expire.js"></script>
 </head>
 <body>
 <div class="flex-center position-ref full-height">
@@ -24,8 +27,9 @@
         </div>
         <form class="content" action="{{ route('getUrl') }}" method="post">
             @csrf
-            <div class="input-group mb-3">
-                <input type="text" class="form-control" placeholder="Link" aria-label="Link" aria-describedby="basic-addon2" name="url">
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="Link" aria-label="Link"
+                       aria-describedby="basic-addon2" name="url" value="{{ old('url') }}">
                 <div class="input-group-append">
                     <button class="btn btn-outline-secondary" type="submit">Get short link</button>
                 </div>
@@ -33,6 +37,16 @@
             @if ($errors->has('url'))
                 <span class="invalid-feedback"><strong>{{ $errors->first('url') }}</strong></span>
             @endif
+            <div class="form-check mb-1 mt-3">
+                <input class="form-check-input" type="checkbox" id="expire">
+                <label class="form-check-label" for="expire">Create limited lifetime link</label>
+            </div>
+            <div class="d-flex flex-column align-items-center date-height">
+                <input class="form-control w-50 d-none" type="datetime-local" id="localdate" min="{{ $mintime }}" name="datetime" value="{{ old('datetime') }}"/>
+                @if ($errors->has('datetime'))
+                    <span class="invalid-feedback"><strong>{{ $errors->first('datetime') }}</strong></span>
+                @endif
+            </div>
         </form>
     </div>
 </div>
