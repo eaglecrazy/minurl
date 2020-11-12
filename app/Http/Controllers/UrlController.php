@@ -7,6 +7,7 @@ use App\Url;
 use Hashids\Hashids;
 use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
+use UAParser\Parser;
 
 
 class UrlController extends Controller
@@ -70,19 +71,70 @@ class UrlController extends Controller
         $url = Url::find($id[0]);
 
         //проверка на время жизни ссылки
-        if(isset($url['expire'])){
+        if (isset($url['expire'])) {
             $now = Carbon::now()->addHours(3);
             $expire = new Carbon($url['expire']);
             //если ссылка истекла удалим её
-            if($now->diffInMinutes($expire, false) <= 0){
+            if ($now->diffInMinutes($expire, false) <= 0) {
                 $url->delete();
                 abort(419);
             }
         }
         $url = 'http://' . $url['url'];
 
-//        dd($_SERVER['HTTP_USER_AGENT']);
+        //СОБЕРЁМ СТАТИСТИКУ
+        $browser = $this->parseUserAgent($_SERVER['HTTP_USER_AGENT']);
+
+        $ip = $this->get_ip();
+        //ТЕСТОВЫЙ АДРЕС
+        $ip = '2.136.0.255';
+        $place = $this->get_place($ip);
 
         return redirect()->away(url($url));
+    }
+
+    function get_ip()
+    {
+        $value = '';
+        if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+            $value = $_SERVER['HTTP_CLIENT_IP'];
+        } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            $value = $_SERVER['HTTP_X_FORWARDED_FOR'];
+        } elseif (!empty($_SERVER['REMOTE_ADDR'])) {
+            $value = $_SERVER['REMOTE_ADDR'];
+        }
+
+        return $value;
+    }
+
+
+    private function get_place($ip)
+    {
+        $myApiKey = 'HWorTrJ8I9hIHV90JZQgmf9Sy6PxyAcIyzgD3M2c';
+//        $url = 'https://ip-location.icu/api/v1/country/?apiKey='.$myApiKey.'&ip=185.81.67.98';
+//        $url = 'https://ip-location.icu/api/v1/city/?apiKey='.$myApiKey.'&ip=185.81.67.98';
+        $url = 'https://ip-location.icu/api/v1/city/?apiKey=' . $myApiKey . '&ip=' . $ip;
+        $response = file_get_contents($url);
+        $info = json_decode($response, true);
+
+        if (isset($info['error']) || $info['country_name'] == '-') {
+            return null;
+        }
+
+        return [
+            'country' => $info['country_name'],
+            'city' => $info['city_name'],
+            'region' => $info['region_name'],
+            'ip' => $ip,
+        ];
+    }
+
+    private function parseUserAgent($user)
+    {
+        $parser = Parser::create();
+        $result = $parser->parse($user);
+        if(!isset($result->ua->family))
+            return null;
+        return $result->ua->family;
     }
 }
