@@ -18,6 +18,7 @@
     {{--JS--}}
     <script defer src="js/app.js"></script>
     <script defer src="js/expire.js"></script>
+    <script defer src="js/change.js"></script>
 </head>
 <body>
 <div class="flex-center position-ref full-height">
@@ -29,7 +30,7 @@
             @csrf
             <div class="input-group">
                 <input type="text" class="form-control" placeholder="Link" aria-label="Link"
-                       aria-describedby="basic-addon2" name="url" value="{{ old('url') }}">
+                       aria-describedby="basic-addon2" name="url" id="url" value="{{ old('url') }}">
                 <div class="input-group-append">
                     <button class="btn btn-outline-secondary" type="submit">Get short link</button>
                 </div>

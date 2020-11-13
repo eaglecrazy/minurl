@@ -10942,3 +10942,12 @@ body {
 .date-height{
     height: 70px;
 }
+
+.gray{
+    background-color: #dcdcdc;
+}
+
+.statistics {
+    border: 2px solid #dcdcdc;
+    padding: 20px;
+}

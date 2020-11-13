@@ -86,16 +86,18 @@ class UrlController extends Controller
 
         //СОБЕРЁМ СТАТИСТИКУ
         $this->statistics($id);
-        dd('stop redirect');
+//        dd('stop redirect');
         return redirect()->away(url($url));
     }
 
     private function statistics($id){
         $browser = $this->parseUserAgent($_SERVER['HTTP_USER_AGENT']);
         $ip = $this->get_ip();
-        //ТЕСТОВЫЙ АДРЕС
+
+//        ТЕСТОВЫЙ АДРЕС
         $ips = ['2.136.0.255', '185.81.67.98', '77.222.113.80', '66.249.89.243', '2.132.171.161', '103.253.24.37'];
         $ip = $ips[rand(0, 5)];
+
         $place = $this->get_place($ip);
 
         $data = UrlData::create([
@@ -106,8 +108,6 @@ class UrlController extends Controller
             'city' => $place['city'],
             'region' => $place['region'],
         ]);
-
-        dd($data);
     }
 
     private function get_ip()

@@ -32,7 +32,7 @@
             <div class="input-group mb-3">
                 <input type="text" class="form-control" aria-label="LinkStat" aria-describedby="basic-addon2" id="urlstat" value="{{ url()->route('home') . '/stat/' . $url }}">
                 <div class="input-group-append">
-                    <button class="btn btn-outline-secondary" type="submit" id="urlbtn">Copy link</button>
+                    <button class="btn btn-outline-secondary" type="submit" id="urlbtn-stat">Copy link</button>
                 </div>
             </div>
         </div>
