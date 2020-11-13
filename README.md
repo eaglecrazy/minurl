@@ -9,13 +9,13 @@
 ## Установка проекта в локальном окружении.
 1. Установить и настроить Vagrant
 2. Создать базу данных "url" 
-* DB_CONNECTION=mysql
-* DB_HOST=192.168.10.10
-* DB_PORT=3306
-* DB_DATABASE=url
-* DB_USERNAME=homestead
-* DB_PASSWORD=secret
-3.Выполнить в директории проекта
+DB_CONNECTION=mysql
+DB_HOST=192.168.10.10
+DB_PORT=3306
+DB_DATABASE=url
+DB_USERNAME=homestead
+DB_PASSWORD=secret
+3. Выполнить в директории проекта
  "git clone https://github.com/eaglecrazy/minurl.git"
  перейти в ветку dev
  "composer install"
