@@ -36,16 +36,16 @@
                 </div>
             </div>
             @if ($errors->has('url'))
-                <span class="invalid-feedback"><strong>{{ $errors->first('url') }}</strong></span>
+                <span class="invalid-feedback" id="invalid-feedback-url"><strong>{{ $errors->first('url') }}</strong></span>
             @endif
             <div class="form-check mb-1 mt-3">
-                <input class="form-check-input" type="checkbox" id="expire">
+                <input class="form-check-input" type="checkbox" id="expire" name="expire" @if(old('expire')){{' checked'}}@endif>
                 <label class="form-check-label" for="expire">Create limited lifetime link</label>
             </div>
             <div class="d-flex flex-column align-items-center date-height">
                 <input class="form-control w-50 d-none" type="datetime-local" id="localdate" min="{{ $mintime }}" name="datetime" value="{{ old('datetime') }}"/>
                 @if ($errors->has('datetime'))
-                    <span class="invalid-feedback"><strong>{{ $errors->first('datetime') }}</strong></span>
+                    <span class="invalid-feedback" id="invalid-feedback-date"><strong>{{ $errors->first('datetime') }}</strong></span>
                 @endif
             </div>
         </form>

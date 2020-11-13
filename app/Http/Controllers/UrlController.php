@@ -7,22 +7,34 @@ use App\Url;
 use App\UrlData;
 use Hashids\Hashids;
 use Illuminate\Support\Str;
-use Illuminate\Support\Carbon;
 use UAParser\Parser;
+use App\Services\DateTimeService;
+use App\Services\HashService;
 
 
 class UrlController extends Controller
 {
+    private $time;
+    private $hash;
+
+    public function __construct()
+    {
+        $this->time = new DateTimeService();
+        $this->hash = new DateTimeService();
+    }
+
     public function home()
     {
-        $date = Carbon::now()->toDateString();
-        $time = Carbon::now()
-            ->addHours(3)
-            ->addMinutes(5)
-            ->toTimeString('minutes');
-        $minTime = $date . 'T' . $time;
+        //минимальное время которое можно назначить для жизни ссылки
+        $minTime = $this->time->datetimeLocalString();
         return view('url', ['mintime' => $minTime]);
     }
+
+
+
+
+
+
 
     public function geturl(UrlRequest $urlRequest)
     {
@@ -38,21 +50,21 @@ class UrlController extends Controller
 
         //поищем этот url
         $url = Url::where('url', $urlText)->first();
+        //если не нашли то добавим в БД
+        $expireDateTime = null;
         if (empty($url)) {
-
-            //если включено ограничение времени жизни
-            $expireDateTime = null;
-            if ($urlRequest['datetime']) {
-                $now = Carbon::now()->addHours(3);
-                $expireDateTime = new Carbon($urlRequest['datetime']);
-                //введено неправильное время
-                if ($now->diffInMinutes($expireDateTime, false) <= 0) {
+            //если в реквесте было указано время
+            if ($urlRequest['expire'] === 'on') {
+                $requestTime = $urlRequest['datetime'];
+                //если время не прошло валидацию
+                if ($this->time->isNotCorrectTime($requestTime)) {
                     return redirect(route('home'))
                         ->withInput()
                         ->withErrors(['datetime' => 'Wrong date or time.']);
                 }
+                //время было проверено
+                $expireDateTime = $this->time->getExpireDateTime($requestTime);
             }
-
             $url = Url::create(['url' => $urlText, 'expire' => $expireDateTime]);
         }
 
@@ -73,24 +85,25 @@ class UrlController extends Controller
         $url = Url::find($id);
 
         //проверка на время жизни ссылки
-        if (isset($url['expire'])) {
-            $now = Carbon::now()->addHours(3);
-            $expire = new Carbon($url['expire']);
-            //если ссылка истекла удалим её
-            if ($now->diffInMinutes($expire, false) <= 0) {
-                $url->delete();
-                abort(419);
-            }
+        if (isset($url['expire']) && $this->time->linkIsExpired($url['expire'])) {
+            $url->delete();
+            //тут нужно найти и удалить связанные данные
+            //тут нужно найти и удалить связанные данные
+            //тут нужно найти и удалить связанные данные
+            //тут нужно найти и удалить связанные данные
+            //тут нужно найти и удалить связанные данные
+            abort(419);
         }
+
         $url = 'http://' . $url['url'];
 
         //СОБЕРЁМ СТАТИСТИКУ
         $this->statistics($id);
-//        dd('stop redirect');
         return redirect()->away(url($url));
     }
 
-    private function statistics($id){
+    private function statistics($id)
+    {
         $browser = $this->parseUserAgent($_SERVER['HTTP_USER_AGENT']);
         $ip = $this->get_ip();
 
@@ -148,7 +161,7 @@ class UrlController extends Controller
     {
         $parser = Parser::create();
         $result = $parser->parse($user);
-        if(!isset($result->ua->family))
+        if (!isset($result->ua->family))
             return null;
         return $result->ua->family;
     }
