@@ -17,4 +17,14 @@ class HashService
     {
         $this->hash = new Hashids($this->salt, $this->hash_length, $this->alphabet);
     }
+
+    public function encode($x)
+    {
+        return $this->hash->encode($x);
+    }
+
+    public function decode($str)
+    {
+        return $this->hash->decode($str);
+    }
 }
