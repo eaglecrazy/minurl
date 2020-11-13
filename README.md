@@ -17,6 +17,7 @@
 * DB_PASSWORD=secret
 3.Выполнить в директории проекта
  "git clone https://github.com/eaglecrazy/minurl.git"
+ перейти в ветку dev
  "composer install"
  "npm run dev"
  "php artisan migrate"
